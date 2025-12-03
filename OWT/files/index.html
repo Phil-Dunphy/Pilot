@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock Puzzle Training</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: white;
+            color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        /* Startseite */
+        .start-screen {
+            display: block;
+        }
+
+        .start-screen.hidden {
+            display: none;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 300;
+            margin-bottom: 60px;
+            letter-spacing: 1px;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        button {
+            background: white;
+            color: black;
+            border: 1px solid black;
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: 300;
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Pin-Pad Buttons ohne persistenten Hover */
+        .pin-pad button:hover {
+            background: white;
+            color: black;
+        }
+
+        .pin-pad button.clicked {
+            background: black;
+            color: white;
+        }
+
+        /* Übungsbildschirm */
+        .exercise-screen {
+            display: none;
+        }
+
+        .exercise-screen.active {
+            display: block;
+        }
+
+        .progress {
+            font-size: 14px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Kritisches Element Anzeige */
+        .critical-element-display {
+            display: none;
+            margin: 0 auto;
+        }
+
+        .critical-element-display.active {
+            display: block;
+        }
+
+        .critical-label {
+            font-size: 14px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .critical-element-text {
+            font-size: 48px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-top: 20px;
+        }
+
+        /* Uhren Container */
+        #puzzle-container {
+            display: none;
+            margin: 40px auto;
+        }
+
+        #puzzle-container.active {
+            display: block;
+        }
+
+        /* Pin Pad */
+        .input-screen {
+            display: none;
+        }
+
+        .input-screen.active {
+            display: block;
+        }
+
+        .input-prompt {
+            font-size: 18px;
+            font-weight: 300;
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+        }
+
+        .pin-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            max-width: 300px;
+            margin: 0 auto 20px;
+        }
+
+        .pin-pad button {
+            aspect-ratio: 1;
+            padding: 0;
+            font-size: 24px;
+        }
+
+        .special-button {
+            grid-column: 2/3;
+            aspect-ratio: auto;
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        /* Feedback */
+        .feedback {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-top: 30px;
+            height: 30px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .feedback.active {
+            opacity: 1;
+        }
+
+        .feedback.correct {
+            color: black;
+        }
+
+        .feedback.incorrect {
+            color: black;
+        }
+
+        /* Ergebnisbildschirm */
+        .results-screen {
+            display: none;
+        }
+
+        .results-screen.active {
+            display: block;
+        }
+
+        .results-title {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 40px;
+            letter-spacing: 1px;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+
+        .score-label {
+            font-size: 16px;
+            font-weight: 300;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        .percentage-display {
+            font-size: 36px;
+            font-weight: 300;
+            margin-bottom: 60px;
+            letter-spacing: 1px;
+        }
+
+        .restart-button {
+            max-width: 300px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Startbildschirm -->
+        <div class="start-screen" id="startScreen">
+            <h1>Clock Puzzle Training</h1>
+            <div class="difficulty-buttons">
+                <button onclick="startTraining('easy')">Einfach</button>
+                <button onclick="startTraining('medium')">Mittel</button>
+                <button onclick="startTraining('hard')">Schwierig</button>
+            </div>
+        </div>
+
+        <!-- Übungsbildschirm -->
+        <div class="exercise-screen" id="exerciseScreen">
+            <div class="progress" id="progress">Übung 1 von 15</div>
+
+            <!-- Kritisches Element Anzeige -->
+            <div class="critical-element-display" id="criticalDisplay">
+                <div class="critical-label">Kritisches Element</div>
+                <div class="critical-element-text" id="criticalElementText"></div>
+            </div>
+
+            <!-- Uhren Container -->
+            <div id="puzzle-container"></div>
+
+            <!-- Eingabebildschirm -->
+            <div class="input-screen" id="inputScreen">
+                <div class="input-prompt" id="inputPrompt">Erste Zahl eingeben</div>
+                <div class="pin-pad">
+                    <button onclick="enterNumber(1)">1</button>
+                    <button onclick="enterNumber(2)">2</button>
+                    <button onclick="enterNumber(3)">3</button>
+                    <button onclick="enterNumber(4)">4</button>
+                    <button onclick="enterNumber(5)">5</button>
+                    <button onclick="enterNumber(6)">6</button>
+                    <button onclick="enterNumber(7)">7</button>
+                    <button onclick="enterNumber(8)">8</button>
+                    <button onclick="enterNumber(0)">0</button>
+                    <button class="special-button" onclick="enterNumber(-1)">Nicht gesehen</button>
+                </div>
+            </div>
+
+            <!-- Feedback -->
+            <div class="feedback" id="feedback"></div>
+        </div>
+
+        <!-- Ergebnisbildschirm -->
+        <div class="results-screen" id="resultsScreen">
+            <div class="results-title">Training abgeschlossen</div>
+            <div class="score-display" id="scoreDisplay">0/60</div>
+            <div class="score-label">Richtige Antworten</div>
+            <div class="percentage-display" id="percentageDisplay">0%</div>
+            <button class="restart-button" onclick="returnToStart()">Zurück zum Start</button>
+        </div>
+    </div>
+
+    <script src="clock-puzzle.js"></script>
+    <script>
+        // Globale Variablen
+        let difficulty = 'easy';
+        let currentExercise = 0;
+        let currentAnswer = 0;
+        let totalExercises = 15;
+        let correctAnswers = 0;
+        let currentPuzzleInfo = null;
+
+        // ClockPuzzle Instanzen
+        let mainPuzzle = null;
+
+        // Schwierigkeitsgrad-Einstellungen
+        const difficultySettings = {
+            easy: { clockDisplayTime: 6000 },
+            medium: { clockDisplayTime: 3500 },
+            hard: { clockDisplayTime: 1500 }
+        };
+
+        // Labels für die Eingabe
+        const answerLabels = ['Erste', 'Zweite', 'Dritte', 'Vierte'];
+
+        // Gegenüberliegende Positionen (0-basiert)
+        const oppositePositions = {
+            0: 4, 1: 5, 2: 6, 3: 7,
+            4: 0, 5: 1, 6: 2, 7: 3
+        };
+
+        // Berechnet sichtbare Zahlen basierend auf Schwierigkeitsgrad
+        function calculateVisibleNumbers(pointerPosition, startNumber, difficulty) {
+            const allNumbers = [1, 2, 3, 4, 5, 6, 7, 8];
+
+            // Welche Zahl zeigt der Zeiger an?
+            const pointedNumber = ((pointerPosition + startNumber - 1) % 8) + 1;
+
+            if (difficulty === 'easy') {
+                // Einfach: Zeiger-Position muss Zahl haben, Rest zufällig
+                const visible = [pointedNumber];
+
+                // Andere Zahlen zufällig hinzufügen
+                allNumbers.forEach(num => {
+                    if (num !== pointedNumber && Math.random() > 0.3) {
+                        visible.push(num);
+                    }
+                });
+
+                return visible;
+            }
+            else if (difficulty === 'medium') {
+                // Mittel: 50% normal, 50% gegenüber
+                const useOpposite = Math.random() < 0.5;
+
+                if (useOpposite) {
+                    // Gegenüber-Position
+                    const oppositePos = oppositePositions[pointerPosition];
+                    const oppositeNumber = ((oppositePos + startNumber - 1) % 8) + 1;
+                    const visible = [oppositeNumber];
+
+                    // Andere Zahlen zufällig (außer Zeiger-Zahl)
+                    allNumbers.forEach(num => {
+                        if (num !== pointedNumber && num !== oppositeNumber && Math.random() > 0.3) {
+                            visible.push(num);
+                        }
+                    });
+
+                    return visible;
+                } else {
+                    // Normal wie "Einfach"
+                    const visible = [pointedNumber];
+
+                    allNumbers.forEach(num => {
+                        if (num !== pointedNumber && Math.random() > 0.3) {
+                            visible.push(num);
+                        }
+                    });
+
+                    return visible;
+                }
+            }
+            else if (difficulty === 'hard') {
+                // Schwierig: 75% gegenüber, 25% weder noch
+                const random = Math.random();
+
+                if (random < 0.75) {
+                    // Gegenüber-Position (wie Medium gegenüber)
+                    const oppositePos = oppositePositions[pointerPosition];
+                    const oppositeNumber = ((oppositePos + startNumber - 1) % 8) + 1;
+                    const visible = [oppositeNumber];
+
+                    // Andere Zahlen zufällig (außer Zeiger-Zahl)
+                    allNumbers.forEach(num => {
+                        if (num !== pointedNumber && num !== oppositeNumber && Math.random() > 0.3) {
+                            visible.push(num);
+                        }
+                    });
+
+                    return visible;
+                } else {
+                    // Weder Zeiger noch Gegenüber
+                    const oppositePos = oppositePositions[pointerPosition];
+                    const oppositeNumber = ((oppositePos + startNumber - 1) % 8) + 1;
+                    const visible = [];
+
+                    // Andere Zahlen zufällig (außer Zeiger-Zahl und Gegenüber-Zahl)
+                    allNumbers.forEach(num => {
+                        if (num !== pointedNumber && num !== oppositeNumber && Math.random() > 0.5) {
+                            visible.push(num);
+                        }
+                    });
+
+                    return visible;
+                }
+            }
+
+            // Fallback
+            return allNumbers;
+        }
+
+        // Training starten
+        function startTraining(selectedDifficulty) {
+            difficulty = selectedDifficulty;
+            currentExercise = 0;
+            correctAnswers = 0;
+
+            // Bildschirm wechseln
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('exerciseScreen').classList.add('active');
+
+            // Puzzle initialisieren
+            if (!mainPuzzle) {
+                mainPuzzle = new ClockPuzzle('#puzzle-container', {
+                    clockSize: 180,
+                    showBorders: false,
+                    gap: 10
+                });
+            }
+
+            // Erste Übung starten
+            startExercise();
+        }
+
+        // Einzelne Übung starten
+        function startExercise() {
+            currentExercise++;
+            currentAnswer = 0;
+
+            // Progress aktualisieren
+            document.getElementById('progress').textContent = `Übung ${currentExercise} von ${totalExercises}`;
+
+            // Alle Bildschirme verstecken
+            document.getElementById('criticalDisplay').classList.remove('active');
+            document.getElementById('puzzle-container').classList.remove('active');
+            document.getElementById('inputScreen').classList.remove('active');
+            document.getElementById('feedback').classList.remove('active');
+
+            // Text leeren um Flash zu vermeiden
+            document.getElementById('criticalElementText').textContent = '';
+
+            // Neues Puzzle generieren
+            mainPuzzle.generateNewPuzzle();
+            currentPuzzleInfo = mainPuzzle.getPuzzleInfo();
+
+            const puzzle = mainPuzzle.currentPuzzle;
+
+            // visibleNumbers für jede Uhr basierend auf Schwierigkeitsgrad berechnen
+            puzzle.visibleNumbersPerClock = [];
+            for (let i = 0; i < 9; i++) {
+                const element = puzzle.elemente[i];
+                const pointerPos = puzzle.pointers[i];
+
+                // Beide Uhrentypen (rund und eckig) verwenden die Schwierigkeitsgrad-Logik
+                const visible = calculateVisibleNumbers(pointerPos, puzzle.startNumber, difficulty);
+                puzzle.visibleNumbersPerClock[i] = visible;
+            }
+
+            // Puzzle neu rendern mit den neuen visibleNumbers
+            mainPuzzle.render();
+
+            // Lösung in Lesereihenfolge (links-nach-rechts, oben-nach-unten) berechnen
+            const solution = [];
+
+            // Durch alle 9 Grid-Positionen gehen
+            for (let i = 0; i < 9; i++) {
+                const originalIndex = puzzle.indices.indexOf(i);
+                const isCritical = originalIndex < 4;
+
+                if (isCritical) {
+                    solution.push(puzzle.pointersBereinigt[originalIndex]);
+                }
+            }
+
+            currentPuzzleInfo.solution = solution;
+
+            // DEBUG: Puzzle-Info ausgeben
+            console.log('Puzzle Info:', currentPuzzleInfo);
+            console.log('Kritisches Element:', currentPuzzleInfo.kritischesElement);
+            console.log('Startnummer:', currentPuzzleInfo.startNumber);
+            console.log('Lösung (in Lesereihenfolge):', currentPuzzleInfo.solution);
+
+            // Kritisches Element anzeigen
+            showCriticalElement();
+        }
+
+        // Kritisches Element anzeigen
+        function showCriticalElement() {
+            const info = currentPuzzleInfo;
+            const critDisplay = document.getElementById('criticalDisplay');
+            const critText = document.getElementById('criticalElementText');
+
+            // Mapping für Anzeigenamen
+            const elementNames = {
+                'dark': 'Schwarz',
+                'light': 'Weiss',
+                'eckig': 'Eckig',
+                'rund': 'Rund'
+            };
+
+            // Kleine Verzögerung um sicherzustellen, dass der alte Text gelöscht wurde
+            setTimeout(() => {
+                // Text setzen
+                critText.textContent = elementNames[info.kritischesElement];
+                critDisplay.classList.add('active');
+
+                // Nach 5 Sekunden zum Puzzle wechseln
+                setTimeout(() => {
+                    critDisplay.classList.remove('active');
+                    showPuzzle();
+                }, 5000);
+            }, 50);
+        }
+
+        // Puzzle anzeigen
+        function showPuzzle() {
+            const puzzleContainer = document.getElementById('puzzle-container');
+            puzzleContainer.classList.add('active');
+
+            // Nach der gewählten Zeit zum Input wechseln
+            const displayTime = difficultySettings[difficulty].clockDisplayTime;
+            setTimeout(() => {
+                puzzleContainer.classList.remove('active');
+                showInput();
+            }, displayTime);
+        }
+
+        // Eingabebildschirm anzeigen
+        function showInput() {
+            updateInputPrompt();
+            document.getElementById('inputScreen').classList.add('active');
+        }
+
+        // Input Prompt aktualisieren
+        function updateInputPrompt() {
+            const label = answerLabels[currentAnswer];
+            document.getElementById('inputPrompt').textContent = `${label} Zahl eingeben`;
+        }
+
+        // Nummer eingeben
+        function enterNumber(number) {
+            // Click-Effekt: Button kurz schwarz machen
+            const clickedButton = event.target;
+            clickedButton.classList.add('clicked');
+
+            setTimeout(() => {
+                clickedButton.classList.remove('clicked');
+            }, 250);
+
+            // Antwort prüfen
+            const correctNumber = currentPuzzleInfo.solution[currentAnswer];
+            const isCorrect = (number === correctNumber) || (number === -1 && correctNumber === undefined);
+
+            // DEBUG: Eingabe und Lösung ausgeben
+            console.log(`Antwort ${currentAnswer + 1}: Eingegeben=${number}, Korrekt=${correctNumber}, Richtig=${isCorrect}`);
+
+            if (isCorrect) {
+                correctAnswers++;
+            }
+
+            // Feedback anzeigen
+            showFeedback(isCorrect);
+
+            // Nächste Antwort oder Übung
+            currentAnswer++;
+
+            if (currentAnswer < 4) {
+                // Nächste Antwort
+                setTimeout(() => {
+                    document.getElementById('feedback').classList.remove('active');
+                    updateInputPrompt();
+                }, 1000);
+            } else {
+                // Nächste Übung oder Ergebnis
+                setTimeout(() => {
+                    document.getElementById('feedback').classList.remove('active');
+                    document.getElementById('inputScreen').classList.remove('active');
+
+                    if (currentExercise < totalExercises) {
+                        startExercise();
+                    } else {
+                        showResults();
+                    }
+                }, 1000);
+            }
+        }
+
+        // Feedback anzeigen
+        function showFeedback(isCorrect) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = isCorrect ? 'Richtig' : 'Falsch';
+            feedback.className = 'feedback active ' + (isCorrect ? 'correct' : 'incorrect');
+        }
+
+        // Ergebnisse anzeigen
+        function showResults() {
+            document.getElementById('exerciseScreen').classList.remove('active');
+            document.getElementById('resultsScreen').classList.add('active');
+
+            const totalQuestions = totalExercises * 4;
+            const percentage = Math.round((correctAnswers / totalQuestions) * 100);
+
+            document.getElementById('scoreDisplay').textContent = `${correctAnswers}/${totalQuestions}`;
+            document.getElementById('percentageDisplay').textContent = `${percentage}%`;
+        }
+
+        // Zurück zum Start
+        function returnToStart() {
+            document.getElementById('resultsScreen').classList.remove('active');
+            document.getElementById('startScreen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

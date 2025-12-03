@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClockPuzzle - Minimal Integration</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <!-- Nur dieser Container wird benötigt -->
+    <div id="my-puzzle"></div>
+
+    <!-- Die Bibliothek einbinden -->
+    <script src="clock-puzzle.js"></script>
+    
+    <!-- Initialisierung -->
+    <script>
+        // Einfachste Integration: 3x3 Rätsel ohne Rahmen
+        const puzzle = new ClockPuzzle('#my-puzzle', {
+            clockSize: 200,      // Größe jeder Uhr
+            showBorders: false,  // Keine Rahmen
+            gap: 10              // Abstand zwischen Uhren
+        });
+
+        // Optional: Entwickler-Funktionen per Konsole verfügbar
+        // puzzle.generateNewPuzzle()           - Neues Rätsel
+        // puzzle.toggleCriticalHighlight()     - Kritische Uhren markieren
+        // puzzle.getPuzzleInfo()               - Lösung abrufen
+    </script>
+</body>
+</html>

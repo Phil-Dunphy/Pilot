@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClockPuzzle - Integration Beispiele</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .example {
+            background: white;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .example h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .controls {
+            margin: 20px 0;
+            padding: 15px;
+            background: #e7f3ff;
+            border-radius: 5px;
+        }
+
+        #puzzle-container-1,
+        #puzzle-container-2,
+        #puzzle-container-3 {
+            margin-top: 20px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .info-box strong {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <h1>🕐 ClockPuzzle - Integration Beispiele</h1>
+
+    <!-- Beispiel 1: Einfaches 3x3 Rätsel ohne Rahmen -->
+    <div class="example">
+        <h2>Beispiel 1: 3x3 Rätsel (Nur Uhren, keine Rahmen)</h2>
+        <p>Der Nutzer sieht nur die 9 Uhren ohne weitere UI-Elemente.</p>
+        
+        <div class="code-block">
+            <pre>&lt;!-- HTML --&gt;
+&lt;div id="puzzle-container-1"&gt;&lt;/div&gt;
+
+&lt;!-- JavaScript --&gt;
+&lt;script src="clock-puzzle.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    const puzzle1 = new ClockPuzzle('#puzzle-container-1', {
+        clockSize: 200,
+        showBorders: false,
+        gap: 10
+    });
+&lt;/script&gt;</pre>
+        </div>
+
+        <div class="controls">
+            <p><strong>Entwickler-Funktionen:</strong></p>
+            <button onclick="puzzle1.generateNewPuzzle()">Neues Rätsel</button>
+            <button onclick="puzzle1.toggleCriticalHighlight()">Kritische Uhren markieren</button>
+            <button onclick="showInfo1()">Lösung anzeigen</button>
+        </div>
+
+        <div id="info1" class="info-box" style="display:none;"></div>
+        <div id="puzzle-container-1"></div>
+    </div>
+
+    <!-- Beispiel 2: Einzelne Uhr -->
+    <div class="example">
+        <h2>Beispiel 2: Einzelne Uhr anzeigen</h2>
+        <p>Zeige nur eine einzelne konfigurierbare Uhr an.</p>
+        
+        <div class="code-block">
+            <pre>&lt;!-- HTML --&gt;
+&lt;div id="puzzle-container-2"&gt;&lt;/div&gt;
+
+&lt;!-- JavaScript --&gt;
+&lt;script&gt;
+    const puzzle2 = new ClockPuzzle('#puzzle-container-2');
+    puzzle2.showSingleClock({
+        startNumber: 3,
+        pointerPosition: 5,
+        visibleNumbers: [1, 2, 3, 4, 5, 6, 7, 8],
+        theme: 'light',
+        shape: 'rund'
+    });
+&lt;/script&gt;</pre>
+        </div>
+
+        <div class="controls">
+            <button onclick="showRoundClock()">Runde Uhr</button>
+            <button onclick="showSquareClock()">Eckige Uhr</button>
+            <button onclick="showDarkClock()">Dunkle Uhr</button>
+            <button onclick="showLightClock()">Helle Uhr</button>
+        </div>
+
+        <div id="puzzle-container-2" style="text-align: center;"></div>
+    </div>
+
+    <!-- Beispiel 3: Mit Rahmen (für Entwicklung) -->
+    <div class="example">
+        <h2>Beispiel 3: 3x3 Rätsel mit Rahmen (Entwicklermodus)</h2>
+        <p>Für die Entwicklung kannst du Rahmen aktivieren.</p>
+        
+        <div class="code-block">
+            <pre>&lt;!-- JavaScript --&gt;
+&lt;script&gt;
+    const puzzle3 = new ClockPuzzle('#puzzle-container-3', {
+        clockSize: 180,
+        showBorders: true,  // Rahmen aktivieren
+        gap: 15
+    });
+&lt;/script&gt;</pre>
+        </div>
+
+        <div class="controls">
+            <button onclick="puzzle3.generateNewPuzzle()">Neues Rätsel</button>
+            <button onclick="puzzle3.setCriticalHighlight(true)">Kritische markieren</button>
+            <button onclick="puzzle3.setCriticalHighlight(false)">Markierung entfernen</button>
+            <button onclick="puzzle3.setOptions({showBorders: !puzzle3.options.showBorders}); puzzle3.render();">Rahmen umschalten</button>
+        </div>
+
+        <div id="puzzle-container-3"></div>
+    </div>
+
+    <!-- API Referenz -->
+    <div class="example">
+        <h2>📚 API Referenz</h2>
+        
+        <h3>Initialisierung</h3>
+        <div class="code-block">
+            <pre>const puzzle = new ClockPuzzle(container, options);
+
+// container: CSS-Selector (String) oder DOM-Element
+// options: {
+//     mode: 'grid' oder 'single',
+//     clockSize: 300,           // Größe jeder Uhr in Pixeln
+//     showBorders: false,       // Rahmen um Uhren anzeigen
+//     gap: 20                   // Abstand zwischen Uhren
+// }</pre>
+        </div>
+
+        <h3>Methoden</h3>
+        <div class="code-block">
+            <pre>// Neues 3x3 Rätsel generieren
+puzzle.generateNewPuzzle();
+
+// Einzelne Uhr anzeigen
+puzzle.showSingleClock({
+    startNumber: 1,              // 1-8
+    pointerPosition: 0,          // 0-7
+    visibleNumbers: [1,2,3,4,5,6,7,8],
+    theme: 'light',              // 'light' oder 'dark'
+    shape: 'rund'                // 'rund' oder 'eckig'
+});
+
+// Kritische Uhren markieren (toggle)
+puzzle.toggleCriticalHighlight();
+
+// Kritische Uhren markieren (set)
+puzzle.setCriticalHighlight(true);  // oder false
+
+// Puzzle-Informationen abrufen
+const info = puzzle.getPuzzleInfo();
+// Gibt zurück: {
+//     kritischesElement: 'light' / 'dark' / 'rund' / 'eckig',
+//     startNumber: 1-8,
+//     solution: [1, 3, 5, 7]  // Die 4 Lösungszahlen
+// }
+
+// Optionen ändern
+puzzle.setOptions({
+    clockSize: 250,
+    showBorders: true
+});</pre>
+        </div>
+    </div>
+
+    <script src="clock-puzzle.js"></script>
+    <script>
+        // Beispiel 1: Standard 3x3 ohne Rahmen
+        const puzzle1 = new ClockPuzzle('#puzzle-container-1', {
+            clockSize: 200,
+            showBorders: false,
+            gap: 10
+        });
+
+        function showInfo1() {
+            const info = puzzle1.getPuzzleInfo();
+            const infoBox = document.getElementById('info1');
+            const elementNames = {
+                'light': '☀️ Hell (Light)',
+                'dark': '🌙 Dunkel (Dark)',
+                'rund': '⭕ Rund',
+                'eckig': '⬜ Eckig'
+            };
+            infoBox.innerHTML = `
+                <strong>Kritisches Element:</strong> ${elementNames[info.kritischesElement]}<br>
+                <strong>Startnummer:</strong> ${info.startNumber}<br>
+                <strong>Lösung:</strong> ${info.solution.join(', ')}
+            `;
+            infoBox.style.display = 'block';
+        }
+
+        // Beispiel 2: Einzelne Uhr
+        const puzzle2 = new ClockPuzzle('#puzzle-container-2');
+        puzzle2.showSingleClock({
+            startNumber: 3,
+            pointerPosition: 5,
+            visibleNumbers: [1, 2, 3, 4, 5, 6, 7, 8],
+            theme: 'light',
+            shape: 'rund'
+        });
+
+        function showRoundClock() {
+            puzzle2.showSingleClock({
+                startNumber: 1,
+                pointerPosition: 2,
+                visibleNumbers: [1, 2, 3, 4, 5, 6, 7, 8],
+                theme: 'light',
+                shape: 'rund'
+            });
+        }
+
+        function showSquareClock() {
+            puzzle2.showSingleClock({
+                startNumber: 4,
+                pointerPosition: 6,
+                visibleNumbers: [1, 5],
+                theme: 'light',
+                shape: 'eckig'
+            });
+        }
+
+        function showDarkClock() {
+            puzzle2.showSingleClock({
+                startNumber: 7,
+                pointerPosition: 3,
+                visibleNumbers: [1, 2, 3, 4, 5, 6, 7, 8],
+                theme: 'dark',
+                shape: 'rund'
+            });
+        }
+
+        function showLightClock() {
+            puzzle2.showSingleClock({
+                startNumber: 2,
+                pointerPosition: 4,
+                visibleNumbers: [1, 5],
+                theme: 'light',
+                shape: 'eckig'
+            });
+        }
+
+        // Beispiel 3: Mit Rahmen
+        const puzzle3 = new ClockPuzzle('#puzzle-container-3', {
+            clockSize: 180,
+            showBorders: true,
+            gap: 15
+        });
+    </script>
+</body>
+</html>
